@@ -1,0 +1,6 @@
+/.idea/
+/target/
+
+/thin.iml
+
+.DS_Store
