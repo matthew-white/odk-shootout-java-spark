@@ -18,7 +18,7 @@ import java.util.List;
 
 public class Submission extends AbstractModel {
 	private static final TableMetadata TABLE =
-		new TableMetadata("submissions", "formId", "instanceId", "xml");
+		new TableMetadata("submissions", "formId", "instanceId", "data");
 
 	private static final DocumentBuilder XML_PARSER;
 	static {
@@ -86,13 +86,13 @@ public class Submission extends AbstractModel {
 			return null;
 	}
 
-	public String getXml() {
-		return (String) value("xml");
+	public String getData() {
+		return (String) value("data");
 	}
 
-	public void setXml(String xml) {
-		setXmlRoot(xml);
-		value("xml", getXmlRoot() != null ? xml : null);
+	public void setData(String data) {
+		setXmlRoot(data);
+		value("data", getXmlRoot() != null ? data : null);
 		setFormId(getXmlFormId());
 		setInstanceId(getXmlInstanceId());
 	}
@@ -101,14 +101,14 @@ public class Submission extends AbstractModel {
 		boolean valid = true;
 		valid = valid && getFormId() != null && !getFormId().isEmpty();
 		valid = valid && getInstanceId() != null && !getInstanceId().isEmpty();
-		valid = valid && getXml() != null && !getXml().isEmpty();
+		valid = valid && getData() != null && !getData().isEmpty();
 		valid = valid && getFormId().equals(getXmlFormId());
 		valid = valid && getInstanceId().equals(getXmlInstanceId());
 		return valid;
 	}
 
 	private static class ApiRepresentation {
-		private String formId, instanceId, xml;
+		private String formId, instanceId, data;
 
 		// Needed for Gson to deserialize.
 		public ApiRepresentation() { }
@@ -116,7 +116,7 @@ public class Submission extends AbstractModel {
 		public ApiRepresentation(Submission submission) {
 			this.formId = submission.getFormId();
 			this.instanceId = submission.getInstanceId();
-			this.xml = submission.getXml();
+			this.data = submission.getData();
 		}
 	}
 

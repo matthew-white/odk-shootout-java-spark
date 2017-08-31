@@ -149,7 +149,7 @@ public class SubmissionsController {
 
 		public String body() {
 			Submission submission = new Submission();
-			submission.setXml(request().body());
+			submission.setData(request().body());
 			if (submission.save())
 				return "";
 			else {
@@ -173,7 +173,7 @@ public class SubmissionsController {
 			);
 			if (submission == null)
 				return badRequest("Submission not found");
-			submission.setXml(request().body());
+			submission.setData(request().body());
 			return submission.save() ? "" : badRequest("Failed to update submission");
 		}
 	}
