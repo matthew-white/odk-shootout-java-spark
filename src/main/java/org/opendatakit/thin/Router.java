@@ -2,6 +2,7 @@ package org.opendatakit.thin;
 
 import com.google.common.collect.ImmutableSet;
 import org.opendatakit.thin.controllers.Action;
+import org.opendatakit.thin.controllers.AggregationsController;
 import org.opendatakit.thin.controllers.SubmissionsController;
 import spark.Request;
 import spark.Response;
@@ -104,6 +105,7 @@ public class Router {
 		before((request, response) ->
 			response.header("Access-Control-Allow-Origin", "*"));
 		get("/submission/:formId", SubmissionsController.GetFormSubmissions::new);
+		get("/counts_by_age/:formId", AggregationsController.GetCountsByAge::new);
 		notFound("404 Not found");
 	}
 }

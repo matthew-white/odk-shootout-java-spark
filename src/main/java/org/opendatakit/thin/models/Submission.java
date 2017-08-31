@@ -85,6 +85,14 @@ public class Submission extends AbstractModel {
 			"WHERE                        " +
 			"    formId = :formId AND     " +
 			"    instanceId = :instanceId " ;
+		String COUNTS_BY_AGE =
+			"select                          " +
+			"    (data->>'age')::int as age, " +
+			"    count(*)                    " +
+			"from submissions                " +
+			"where formId = :formId          " +
+			"group by age                    " +
+			"order by age                    " ;
 	}
 
 	public static ResultSetIterable<Submission> forFormId(Connection connection,
@@ -171,6 +179,39 @@ public class Submission extends AbstractModel {
 				.addParameter("instanceId", instanceId);
 			log(query, "formId", formId, "instanceId", instanceId);
 			return query.executeAndFetchFirst(Submission.class);
+		}
+	}
+
+	private static class CountByAge {
+		private Integer age;
+		private int count;
+
+		public CountByAge() { }
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+
+		public int getCount() {
+			return count;
+		}
+
+		public void setCount(int count) {
+			this.count = count;
+		}
+	}
+
+	public static List<?> countsByAge(String formId) {
+		try (Connection connection = connection()) {
+			Query query = connection
+				.createQuery(Queries.COUNTS_BY_AGE)
+				.addParameter("formId", formId);
+			log(query, "formId", formId);
+			return query.executeAndFetch(CountByAge.class);
 		}
 	}
 }
