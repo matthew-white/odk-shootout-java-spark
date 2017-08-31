@@ -36,12 +36,12 @@ public abstract class AbstractModel implements ApiRepresentable {
 		Application.logger().info("{}  {}", query, parameters);
 	}
 
-	protected static void log(Query query, String... parameters) {
+	protected static void log(Query query, Object... parameters) {
 		if (parameters.length % 2 != 0)
 			throw new IllegalArgumentException("invalid parameters");
-		Map map = new LinkedHashMap();
+		Map<String, Object> map = new LinkedHashMap<>();
 		for (int i = 0; i < parameters.length; i += 2)
-			map.put(parameters[i], parameters[i + 1]);
+			map.put((String) parameters[i], parameters[i + 1]);
 		log(query, map);
 	}
 

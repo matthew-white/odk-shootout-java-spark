@@ -1,10 +1,12 @@
 package org.opendatakit.thin.models;
 
+import com.google.common.collect.ImmutableSet;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.ResultSetIterable;
 
 import java.util.List;
+import java.util.Set;
 
 public class Submission extends AbstractModel {
 	private static final TableMetadata TABLE =
@@ -66,9 +68,20 @@ public class Submission extends AbstractModel {
 	private interface Queries {
 		// Leaving a trailing space so that it's easy to append additional SQL.
 		String FOR_FORM_ID = "SELECT * FROM submissions WHERE formId = :formId ";
-		String SAMPLE_FOR_FORM_ID = FOR_FORM_ID + "LIMIT 1000 ";
+		String PAGE_OF_FIELDS =
+			"select                                      " +
+			"    id,                                     " +
+			"    (data->>'age')::int as age,             " +
+			"    (data->>'kilograms')::int as kilograms, " +
+			"    (data->>'year')::int as year            " +
+			"from submissions                            " +
+			"where formId = :formId                      " +
+			"order by :order, id                         " +
+			"limit :limit                                " +
+			"offset :offset                              " ;
 		String FIND_BY_INSTANCE_ID =
-			"SELECT * FROM submissions    " +
+			"SELECT *                     " +
+			"FROM submissions             " +
 			"WHERE                        " +
 			"    formId = :formId AND     " +
 			"    instanceId = :instanceId " ;
@@ -83,13 +96,69 @@ public class Submission extends AbstractModel {
 		return query.executeAndFetchLazy(Submission.class);
 	}
 
-	public static List<Submission> sampleForFormId(String formId) {
+	private static class Fields {
+		private long id;
+		private Integer age, kilograms, year;
+
+		private static final Set<String> NAMES =
+			ImmutableSet.of("id", "age", "kilograms", "year");
+
+		public static Set<String> names() {
+			return NAMES;
+		}
+
+		public Fields() { }
+
+		public long getId() {
+			return id;
+		}
+
+		public void setId(long id) {
+			this.id = id;
+		}
+
+		public Integer getAge() {
+			return age;
+		}
+
+		public void setAge(Integer age) {
+			this.age = age;
+		}
+
+		public Integer getKilograms() {
+			return kilograms;
+		}
+
+		public void setKilograms(Integer kilograms) {
+			this.kilograms = kilograms;
+		}
+
+		public Integer getYear() {
+			return year;
+		}
+
+		public void setYear(Integer year) {
+			this.year = year;
+		}
+	}
+
+	public static List<?> pageOfFields(String formId, String sortField,
+		int perPage, int page) {
+		if (perPage < 0 || page < 1 ||
+			(sortField != null && !Fields.names().contains(sortField)))
+			throw new IllegalArgumentException();
 		try (Connection connection = connection()) {
+			String order = sortField != null ? sortField : "id";
+			String sql = Queries.PAGE_OF_FIELDS.replace(":order", order);
+			int offset = perPage * (page - 1);
 			Query query = connection
-				.createQuery(Queries.SAMPLE_FOR_FORM_ID)
-				.addParameter("formId", formId);
-			log(query, "formId", formId);
-			return query.executeAndFetch(Submission.class);
+				.createQuery(sql)
+				.addParameter("formId", formId)
+				.addParameter("limit", perPage)
+				.addParameter("offset", offset);
+			log(query, "formId", formId, "order", order, "limit", perPage,
+				"offset", offset);
+			return query.executeAndFetch(Fields.class);
 		}
 	}
 
