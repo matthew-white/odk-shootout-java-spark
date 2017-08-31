@@ -11,6 +11,7 @@ import spark.Spark;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import static spark.Spark.before;
 import static spark.Spark.notFound;
 import static spark.Spark.path;
 
@@ -100,6 +101,8 @@ public class Router {
 		// All routes should return an Action object. body() is called on the Action
 		// object before it is returned as the response body.
 
+		before((request, response) ->
+			response.header("Access-Control-Allow-Origin", "*"));
 		get("/submission/:formId", SubmissionsController.GetFormSubmissions::new);
 		notFound("404 Not found");
 	}
