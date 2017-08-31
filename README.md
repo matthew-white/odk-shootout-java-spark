@@ -16,7 +16,7 @@ CREATE TABLE submissions (
     id bigserial PRIMARY KEY,
     formId text,
     instanceId text,
-    data text,
+    data jsonb,
 
     CONSTRAINT instanceId_unique UNIQUE (formId, instanceId)
 );

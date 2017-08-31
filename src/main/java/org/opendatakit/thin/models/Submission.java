@@ -3,34 +3,12 @@ package org.opendatakit.thin.models;
 import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.ResultSetIterable;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 
 public class Submission extends AbstractModel {
 	private static final TableMetadata TABLE =
 		new TableMetadata("submissions", "formId", "instanceId", "data");
-
-	private static final DocumentBuilder XML_PARSER;
-	static {
-		try {
-			XML_PARSER = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-		}
-		catch (ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private Element xmlRoot;
 
 	public TableMetadata table() {
 		return TABLE;
@@ -52,49 +30,12 @@ public class Submission extends AbstractModel {
 		value("instanceId", instanceId);
 	}
 
-	public Element getXmlRoot() {
-		return xmlRoot;
-	}
-
-	private void setXmlRoot(String xml) {
-		xmlRoot = null;
-		if (xml != null) {
-			Document document = null;
-			InputSource source = new InputSource(new StringReader(xml));
-			try {
-				document = XML_PARSER.parse(source);
-			}
-			catch (IOException | SAXException e) {
-				// Do nothing: xmlRoot will be set to null.
-			}
-			if (document != null && document.getChildNodes().getLength() == 1) {
-				Node rootNode = document.getChildNodes().item(0);
-				if (rootNode instanceof Element)
-					xmlRoot = (Element) rootNode;
-			}
-		}
-	}
-
-	private String getXmlFormId() {
-		return getXmlRoot() != null ? getXmlRoot().getAttribute("id") : null;
-	}
-
-	private String getXmlInstanceId() {
-		if (getXmlRoot() != null)
-			return getXmlRoot().getAttribute("instanceID");
-		else
-			return null;
-	}
-
 	public String getData() {
 		return (String) value("data");
 	}
 
 	public void setData(String data) {
-		setXmlRoot(data);
-		value("data", getXmlRoot() != null ? data : null);
-		setFormId(getXmlFormId());
-		setInstanceId(getXmlInstanceId());
+		value("data", data);
 	}
 
 	public boolean isValid() {
@@ -102,8 +43,6 @@ public class Submission extends AbstractModel {
 		valid = valid && getFormId() != null && !getFormId().isEmpty();
 		valid = valid && getInstanceId() != null && !getInstanceId().isEmpty();
 		valid = valid && getData() != null && !getData().isEmpty();
-		valid = valid && getFormId().equals(getXmlFormId());
-		valid = valid && getInstanceId().equals(getXmlInstanceId());
 		return valid;
 	}
 

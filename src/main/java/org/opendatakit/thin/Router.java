@@ -100,15 +100,7 @@ public class Router {
 		// All routes should return an Action object. body() is called on the Action
 		// object before it is returned as the response body.
 
-		path("/submission", () -> {
-			post(SubmissionsController.Create::new);
-			get("/:formIdWithFormat", SubmissionsController.GetFormSubmissions::new);
-
-			path("/:formId/:instanceId", () -> {
-				get(SubmissionsController.GetSubmission::new);
-				patch(SubmissionsController.Update::new);
-			});
-		});
+		get("/submission/:formId", SubmissionsController.GetFormSubmissions::new);
 		notFound("404 Not found");
 	}
 }
